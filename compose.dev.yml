@@ -1,0 +1,69 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-booklibrary_dev}
+      POSTGRES_USER: ${POSTGRES_USER:-booklibrary}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-booklibrary}
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - database
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-booklibrary} -d ${POSTGRES_DB:-booklibrary_dev}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    restart: unless-stopped
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-booklibrary_dev}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-booklibrary}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-booklibrary}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      MAVEN_OPTS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005
+    volumes:
+      - ./backend:/app
+      - maven_cache:/root/.m2
+    ports:
+      - "8080:8080"
+      - "5005:5005"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - app
+      - database
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    restart: unless-stopped
+    environment:
+      NUXT_PUBLIC_API_BASE: ${NUXT_PUBLIC_API_BASE:-http://localhost:8080}
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.nuxt
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - app
+
+volumes:
+  postgres_dev_data:
+  maven_cache:
+
+networks:
+  app:
+  database:
