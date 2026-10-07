@@ -1,0 +1,12 @@
+{
+  "name": "Book Library Backend",
+  "dockerComposeFile": "../compose.dev.yml",
+  "service": "backend",
+  "workspaceFolder": "/app",
+
+  "customizations": {
+    "vscode": {
+      "extensions": ["vscjava.vscode-java-pack"]
+    }
+  }
+}

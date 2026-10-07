@@ -14,6 +14,8 @@ import org.springframework.web.multipart.MultipartFile;
 import dev.murylo.backend.dtos.BookResponse;
 import dev.murylo.backend.dtos.CreateBookRequest;
 import dev.murylo.backend.entities.Book;
+import dev.murylo.backend.exception.FileStorageException;
+import dev.murylo.backend.exception.ResourceNotFoundException;
 import dev.murylo.backend.repositories.BookRepository;
 import jakarta.transaction.Transactional;
 
@@ -78,7 +80,7 @@ public class BookService {
 
     public BookResponse update(CreateBookRequest request, Long id){
 
-        Book book = bookRepository.findById(id).orElseThrow();
+        Book book = bookRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Livro não encontrado!"));
 
         if(request.coverImage() != null){
             File oldFile = new File("uploads/" + book.getCoverImage());
@@ -115,7 +117,7 @@ public class BookService {
     @Transactional 
     public void delete(Long id) {
         Book book = bookRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Livro não encontrado"));
+            .orElseThrow(() -> new ResourceNotFoundException("Livro não encontrado!"));
 
         deleteImage(book.getCoverImage());
 
@@ -146,10 +148,7 @@ public class BookService {
             return "books/" + filename;
 
         } catch (IOException e) {
-            throw new RuntimeException(
-                    "Erro ao salvar imagem",
-                    e
-            );
+            throw new FileStorageException("Não foi possível salvar a imagem de capa");
         }
     }
 

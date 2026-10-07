@@ -4,16 +4,12 @@ WORKDIR /app
 
 COPY mvnw pom.xml ./
 COPY .mvn .mvn
-RUN chmod +x mvnw && ./mvnw dependency:go-offline
+
+RUN chmod +x mvnw
 
 COPY src src
 
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends inotify-tools \
-    && rm -rf /var/lib/apt/lists/*
+EXPOSE 8080
+EXPOSE 5005
 
-EXPOSE 8080 5005
-
-# Sobe a app e, em paralelo, recompila ao detectar mudanças.
-# O Spring DevTools detecta target/classes alterado e faz o restart.
-CMD ["sh", "-c", "./mvnw -Dspring-boot.run.fork=false spring-boot:run & while true; do inotifywait -r -e modify,create,delete,move src/main/java && MAVEN_OPTS= ./mvnw compile; done"]
+CMD ["./mvnw", "-Dspring-boot.run.fork=false", "spring-boot:run"]

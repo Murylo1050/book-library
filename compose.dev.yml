@@ -1,6 +1,6 @@
 services:
   postgres:
-    image: postgres:16-alpine
+    image: docker.io/library/postgres:16-alpine
     restart: unless-stopped
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-booklibrary_dev}
@@ -13,7 +13,11 @@ services:
     networks:
       - database
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-booklibrary} -d ${POSTGRES_DB:-booklibrary_dev}"]
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER:-booklibrary} -d ${POSTGRES_DB:-booklibrary_dev}",
+        ]
       interval: 5s
       timeout: 3s
       retries: 10
