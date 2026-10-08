@@ -52,11 +52,11 @@ services:
       dockerfile: Dockerfile.dev
     restart: unless-stopped
     environment:
-      NUXT_PUBLIC_API_BASE: ${NUXT_PUBLIC_API_BASE:-http://localhost:8080}
+      NUXT_PUBLIC_API_BASE: ${NUXT_PUBLIC_API_BASE:-http://localhost:8080/api}
     volumes:
       - ./frontend:/app
-      - /app/node_modules
-      - /app/.nuxt
+      - ./frontend/node_modules:/app/node_modules
+      - ./frontend/.nuxt:/app/.nuxt
     ports:
       - "3000:3000"
     depends_on:

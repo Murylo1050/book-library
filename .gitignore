@@ -3,3 +3,5 @@ node_modules/
 .nuxt/
 .output/
 target/
+# Added by code-review-graph
+.code-review-graph/
