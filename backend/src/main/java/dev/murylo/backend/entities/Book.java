@@ -23,7 +23,7 @@ public class Book {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(length = 13)
+    @Column(length = 14)
     private String isbn;
 
     @Column (length = 50)
