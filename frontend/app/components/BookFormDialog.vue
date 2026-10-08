@@ -1,8 +1,18 @@
 <template>
-  <dialog ref="dialogEl" class="dialog" @click="onOverlayClick" @close="onClose">
+  <dialog
+    ref="dialogEl"
+    class="dialog"
+    @click="onOverlayClick"
+    @close="onClose"
+  >
     <div class="dialog__header">
       <h2>Cadastrar livro</h2>
-      <button type="button" class="dialog__close" aria-label="Fechar" @click="close">
+      <button
+        type="button"
+        class="dialog__close"
+        aria-label="Fechar"
+        @click="close"
+      >
         &times;
       </button>
     </div>
@@ -27,7 +37,11 @@
             {{ lookingUp ? "Buscando..." : "Buscar na OpenLibrary" }}
           </button>
         </div>
-        <p v-if="lookupMessage" class="hint" :class="{ 'hint--error': lookupError }">
+        <p
+          v-if="lookupMessage"
+          class="hint"
+          :class="{ 'hint--error': lookupError }"
+        >
           {{ lookupMessage }}
         </p>
       </div>
@@ -49,7 +63,12 @@
         </div>
         <div class="field field--narrow">
           <label for="numPages">Páginas</label>
-          <input id="numPages" v-model.number="form.numPages" type="number" min="1" />
+          <input
+            id="numPages"
+            v-model.number="form.numPages"
+            type="number"
+            min="1"
+          />
         </div>
       </div>
 
@@ -62,8 +81,13 @@
           </select>
         </div>
         <div class="field">
-          <label for="cover">Capa</label>
-          <input id="cover" type="file" accept="image/*" @change="onCoverChange" />
+          <label for="coverImage">Capa</label>
+          <input
+            id="coverImage"
+            type="file"
+            accept="image/*"
+            @change="onCoverChange"
+          />
         </div>
       </div>
 
@@ -74,7 +98,9 @@
       <p v-if="submitError" class="hint hint--error">{{ submitError }}</p>
 
       <div class="dialog__footer">
-        <button type="button" class="btn btn-secondary" @click="close">Cancelar</button>
+        <button type="button" class="btn btn-secondary" @click="close">
+          Cancelar
+        </button>
         <button type="submit" class="btn btn-primary" :disabled="submitting">
           {{ submitting ? "Salvando..." : "Salvar livro" }}
         </button>
@@ -216,14 +242,16 @@ async function lookupIsbn() {
 
     lookupMessage.value = "Dados preenchidos a partir da OpenLibrary.";
 
-    const coverUrl = entry.cover?.large || entry.cover?.medium || entry.cover?.small;
+    const coverUrl =
+      entry.cover?.large || entry.cover?.medium || entry.cover?.small;
     if (coverUrl && !(await downloadCover(coverUrl))) {
       lookupMessage.value =
         "Dados preenchidos, mas não foi possível baixar a capa. Selecione um arquivo manualmente.";
     }
   } catch {
     lookupError.value = true;
-    lookupMessage.value = "Falha ao consultar a OpenLibrary. Verifique sua conexão.";
+    lookupMessage.value =
+      "Falha ao consultar a OpenLibrary. Verifique sua conexão.";
   } finally {
     lookingUp.value = false;
   }
