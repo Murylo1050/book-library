@@ -36,7 +36,44 @@
           >
             {{ lookingUp ? "Buscando..." : "Buscar na OpenLibrary" }}
           </button>
+          <button
+            type="button"
+            class="btn btn-secondary isbn-row__scanner"
+            :aria-label="
+              scannerOpen
+                ? 'Fechar leitor de código de barras'
+                : 'Ler código de barras com a câmera'
+            "
+            :aria-pressed="scannerOpen"
+            :title="
+              scannerOpen
+                ? 'Fechar leitor'
+                : 'Ler código de barras com a câmera'
+            "
+            @click="scannerOpen = !scannerOpen"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              aria-hidden="true"
+            >
+              <path d="M3 5v14M7 5v14M11 5v14M15 5v14M19 5v14M21 5v14" />
+            </svg>
+          </button>
         </div>
+
+        <BarcodeScanner
+          v-if="scannerOpen"
+          @scan="onBarcodeScan"
+          @close="scannerOpen = false"
+        />
+
         <p
           v-if="lookupMessage"
           class="hint"
@@ -143,6 +180,7 @@ const lookupMessage = ref("");
 const lookupError = ref(false);
 const submitting = ref(false);
 const submitError = ref("");
+const scannerOpen = ref(false);
 
 watch(open, (value) => {
   const el = dialogEl.value;
@@ -153,8 +191,10 @@ watch(open, (value) => {
     lookupError.value = false;
     submitError.value = "";
     if (!el.open) el.showModal();
-  } else if (el.open) {
-    el.close();
+  } else {
+    // Garante que a câmera pare quando o dialog for fechado.
+    scannerOpen.value = false;
+    if (el.open) el.close();
   }
 });
 
@@ -198,6 +238,14 @@ async function downloadCover(url: string) {
   } catch {
     return false;
   }
+}
+
+/* ---------- Leitor de código de barras ---------- */
+
+function onBarcodeScan(isbn: string) {
+  scannerOpen.value = false;
+  form.isbn = isbn;
+  lookupIsbn();
 }
 
 /* ---------- Busca por ISBN (OpenLibrary) ---------- */
@@ -290,7 +338,9 @@ async function submit() {
   submitting.value = true;
   try {
     const body = new FormData();
-    body.append("isbn", form.isbn);
+    // Remove hífens/espaços ("978-85-..." → "97885...") para caber na coluna.
+    const isbn = form.isbn.replace(/[-\s]/g, "");
+    if (isbn) body.append("isbn", isbn);
     body.append("bookName", form.bookName);
     if (form.author) body.append("author", form.author);
     if (form.publisher) body.append("publisher", form.publisher);
@@ -408,6 +458,17 @@ select:focus {
 .isbn-row input {
   flex: 1;
   min-width: 0;
+}
+
+.isbn-row__scanner {
+  padding: 8px 10px;
+  flex-shrink: 0;
+}
+
+.isbn-row__scanner[aria-pressed="true"] {
+  background: #2563eb;
+  border-color: #2563eb;
+  color: #fff;
 }
 
 .row {
